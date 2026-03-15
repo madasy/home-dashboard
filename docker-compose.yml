@@ -1,0 +1,15 @@
+services:
+  homelab-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: homelab-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
