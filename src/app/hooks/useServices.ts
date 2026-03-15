@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Service, ServiceFormData } from '../types';
 
 const STORAGE_KEY = 'homelab-services';
+const STORAGE_BACKUP_KEY = 'homelab-services-backup';
 
 function createServiceId() {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -44,21 +45,76 @@ const DEFAULT_SERVICES: Service[] = [
   }
 ];
 
-export function useServices() {
-  const [services, setServices] = useState<Service[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return DEFAULT_SERVICES;
-      }
+function isService(value: unknown): value is Service {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const service = value as Record<string, unknown>;
+
+  return (
+    typeof service.id === 'string' &&
+    typeof service.name === 'string' &&
+    typeof service.url === 'string' &&
+    typeof service.icon === 'string' &&
+    (service.description === undefined || typeof service.description === 'string') &&
+    (service.category === undefined || typeof service.category === 'string')
+  );
+}
+
+function parseStoredServices(raw: string | null) {
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return null;
     }
+
+    const services = parsed.filter(isService);
+    return services.length === parsed.length ? services : null;
+  } catch {
+    return null;
+  }
+}
+
+function loadServices() {
+  try {
+    const primary = parseStoredServices(localStorage.getItem(STORAGE_KEY));
+    if (primary) {
+      return primary;
+    }
+
+    const backup = parseStoredServices(localStorage.getItem(STORAGE_BACKUP_KEY));
+    if (backup) {
+      return backup;
+    }
+  } catch {
     return DEFAULT_SERVICES;
-  });
+  }
+
+  return DEFAULT_SERVICES;
+}
+
+function saveServices(services: Service[]) {
+  const serialized = JSON.stringify(services);
+
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+    localStorage.setItem(STORAGE_BACKUP_KEY, serialized);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function useServices() {
+  const [services, setServices] = useState<Service[]>(loadServices);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(services));
+    saveServices(services);
   }, [services]);
 
   const addService = (serviceData: ServiceFormData) => {
