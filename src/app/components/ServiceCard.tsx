@@ -1,7 +1,6 @@
-import { Service, MonitorStatus } from '../types';
+import { Service } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 import { 
   ExternalLink, 
   Pencil, 
@@ -15,18 +14,13 @@ import {
   Lock,
   Wifi,
   HardDrive,
-  Globe,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertCircle
+  Globe
 } from 'lucide-react';
 
 interface ServiceCardProps {
   service: Service;
   onEdit: (service: Service) => void;
   onDelete: (id: string) => void;
-  monitorStatus?: MonitorStatus | null;
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -42,53 +36,8 @@ const iconMap: Record<string, React.ElementType> = {
   Globe
 };
 
-export function ServiceCard({ service, onEdit, onDelete, monitorStatus }: ServiceCardProps) {
+export function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
   const IconComponent = iconMap[service.icon] || Globe;
-
-  const getStatusColor = (status?: MonitorStatus['status']) => {
-    switch (status) {
-      case 'up':
-        return 'bg-green-500/10 text-green-600 dark:text-green-500 border-green-500/20';
-      case 'down':
-        return 'bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20';
-      case 'pending':
-        return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20';
-      case 'maintenance':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-500 border-blue-500/20';
-      default:
-        return 'bg-slate-500/10 text-slate-600 dark:text-slate-500 border-slate-500/20';
-    }
-  };
-
-  const getStatusIcon = (status?: MonitorStatus['status']) => {
-    switch (status) {
-      case 'up':
-        return <CheckCircle2 className="size-3" />;
-      case 'down':
-        return <XCircle className="size-3" />;
-      case 'pending':
-        return <Clock className="size-3" />;
-      case 'maintenance':
-        return <AlertCircle className="size-3" />;
-      default:
-        return null;
-    }
-  };
-
-  const getStatusText = (status?: MonitorStatus['status']) => {
-    switch (status) {
-      case 'up':
-        return 'Online';
-      case 'down':
-        return 'Offline';
-      case 'pending':
-        return 'Prüfung...';
-      case 'maintenance':
-        return 'Wartung';
-      default:
-        return 'Unbekannt';
-    }
-  };
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-200 hover:border-blue-500/50">
@@ -99,26 +48,9 @@ export function ServiceCard({ service, onEdit, onDelete, monitorStatus }: Servic
               <IconComponent className="size-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg">{service.name}</CardTitle>
-                {monitorStatus && (
-                  <Badge 
-                    variant="outline" 
-                    className={`gap-1 ${getStatusColor(monitorStatus.status)}`}
-                  >
-                    {getStatusIcon(monitorStatus.status)}
-                    {getStatusText(monitorStatus.status)}
-                  </Badge>
-                )}
-              </div>
+              <CardTitle className="text-lg">{service.name}</CardTitle>
               {service.description && (
                 <CardDescription className="mt-1">{service.description}</CardDescription>
-              )}
-              {monitorStatus && monitorStatus.ping && (
-                <CardDescription className="mt-1">
-                  Ping: {monitorStatus.ping}ms
-                  {monitorStatus.uptime && ` • Uptime: ${(monitorStatus.uptime * 100).toFixed(1)}%`}
-                </CardDescription>
               )}
             </div>
           </div>

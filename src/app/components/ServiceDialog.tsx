@@ -57,8 +57,7 @@ export function ServiceDialog({ open, onOpenChange, onSave, service }: ServiceDi
     url: '',
     description: '',
     icon: 'Globe',
-    category: '',
-    monitorSlug: ''
+    category: ''
   });
 
   useEffect(() => {
@@ -68,8 +67,7 @@ export function ServiceDialog({ open, onOpenChange, onSave, service }: ServiceDi
         url: service.url,
         description: service.description || '',
         icon: service.icon,
-        category: service.category || '',
-        monitorSlug: service.monitorSlug || ''
+        category: service.category || ''
       });
     } else {
       setFormData({
@@ -77,8 +75,7 @@ export function ServiceDialog({ open, onOpenChange, onSave, service }: ServiceDi
         url: '',
         description: '',
         icon: 'Globe',
-        category: '',
-        monitorSlug: ''
+        category: ''
       });
     }
   }, [service, open]);
@@ -170,18 +167,6 @@ export function ServiceDialog({ open, onOpenChange, onSave, service }: ServiceDi
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="monitorSlug">Uptime Kuma Monitor Name (optional)</Label>
-              <Input
-                id="monitorSlug"
-                value={formData.monitorSlug}
-                onChange={(e) => setFormData({ ...formData, monitorSlug: e.target.value })}
-                placeholder="z.B. dashboard oder portainer"
-              />
-              <p className="text-xs text-slate-500">
-                Name, slug-ähnlicher Wert oder Monitor-ID aus Uptime Kuma. Leer lassen für automatisches Matching.
-              </p>
             </div>
           </div>
           <DialogFooter>

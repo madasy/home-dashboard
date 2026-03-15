@@ -1,25 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useServices } from './hooks/useServices';
-import { useSettings } from './hooks/useSettings';
-import { useMonitorStatus } from './hooks/useMonitorStatus';
 import { Service } from './types';
 import { ServiceCard } from './components/ServiceCard';
 import { ServiceDialog } from './components/ServiceDialog';
-import { SettingsDialog } from './components/SettingsDialog';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
-import { Badge } from './components/ui/badge';
-import { Plus, Search, Server, Settings, RefreshCw } from 'lucide-react';
+import { Plus, Search, Server } from 'lucide-react';
 
 export default function App() {
   const { services, addService, updateService, deleteService } = useServices();
-  const { settings, updateSettings } = useSettings();
-  const { monitorStatuses, loading, error, getStatusForService, refresh } = useMonitorStatus(
-    settings.kumaUrl,
-    settings.kumaStatusPageSlug
-  );
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -107,49 +97,12 @@ export default function App() {
               />
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={refresh}
-                disabled={loading}
-                title="Status aktualisieren"
-              >
-                <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setSettingsOpen(true)}
-                className="gap-2"
-              >
-                <Settings className="size-4" />
-                Einstellungen
-              </Button>
               <Button onClick={handleAdd} className="gap-2">
                 <Plus className="size-4" />
                 Service hinzufügen
               </Button>
             </div>
           </div>
-          
-          {/* Status Info */}
-          {settings.kumaStatusPageSlug && (
-            <div className="mt-4 flex items-center gap-2">
-              {loading ? (
-                <Badge variant="outline" className="gap-1">
-                  <RefreshCw className="size-3 animate-spin" />
-                  Status wird geladen...
-                </Badge>
-              ) : error ? (
-                <Badge variant="outline" className="gap-1 bg-red-500/10 text-red-600 border-red-500/20">
-                  Fehler beim Laden: {error}
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-600 border-green-500/20">
-                  {Object.keys(monitorStatuses).length} Monitor(e) geladen
-                </Badge>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Services */}
@@ -183,7 +136,6 @@ export default function App() {
                       service={service}
                       onEdit={handleEdit}
                       onDelete={deleteService}
-                      monitorStatus={getStatusForService(service.name, service.monitorSlug)}
                     />
                   ))}
                 </div>
@@ -198,14 +150,6 @@ export default function App() {
           onOpenChange={handleDialogChange}
           onSave={handleSave}
           service={editingService}
-        />
-        
-        {/* Settings Dialog */}
-        <SettingsDialog
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          settings={settings}
-          onSave={updateSettings}
         />
       </div>
     </div>
